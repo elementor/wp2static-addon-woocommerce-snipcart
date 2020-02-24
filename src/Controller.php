@@ -3,7 +3,7 @@
 namespace WP2StaticWooCommerceSnipcart;
 
 class Controller {
-    const WP2STATIC_NETLIFY_VERSION = '0.1';
+    const WP2STATIC_WOOCOMMERCE_SNIPCART_VERSION = '0.1';
 
     public function run() : void {
         // initialize options DB
@@ -29,7 +29,7 @@ class Controller {
         // if deployment_url option doesn't exist, create:
         $options = $this->getOptions();
 
-        if ( ! isset( $options['siteID'] ) ) {
+        if ( ! isset( $options['publicAPIKey'] ) ) {
             $this->seedOptions();
         }
 
@@ -46,8 +46,8 @@ class Controller {
         );
 
         add_action(
-            'wp2static_deploy',
-            [ $this, 'deploy' ],
+            'wp2static_process_html_complete',
+            [ $this, 'wooToSnipcart' ],
             15,
             1
         );
@@ -93,19 +93,9 @@ class Controller {
 
         $query = $wpdb->prepare(
             $query_string,
-            'accessToken',
+            'publicAPIKey',
             '',
-            'Personal Access Token',
-            ''
-        );
-
-        $wpdb->query( $query );
-
-        $query = $wpdb->prepare(
-            $query_string,
-            'siteID',
-            '',
-            'Site ID (WooCommerce Snipcart or custom comain)',
+            'Snipcart public API key',
             ''
         );
 
@@ -130,18 +120,11 @@ class Controller {
 
     public static function renderWooCommerceSnipcartPage() : void {
         $view = [];
-        $view['nonce_action'] = 'wp2static-woocommerce-snipcart-options';
+        $view['nonce_action'] = 'wp2static-snipcart';
         $view['uploads_path'] = \WP2Static\SiteInfo::getPath( 'uploads' );
         $view['options'] = self::getOptions();
 
         require_once __DIR__ . '/../views/woocommerce-snipcart-page.php';
-    }
-
-    public function deploy( string $processed_site_path ) : void {
-        \WP2Static\WsLog::l( 'Starting WooCommerce Snipcart deployment.' );
-
-        $woocommerce_snipcart_deployer = new Deployer();
-        $woocommerce_snipcart_deployer->upload_files( $processed_site_path );
     }
 
     /*
@@ -247,38 +230,32 @@ class Controller {
      * @return mixed[] list of menu items
      */
     public static function addSubmenuPage( array $submenu_pages ) : array {
-        $submenu_pages['woocommerce-snipcart'] = [ 'WP2StaticWooCommerceSnipcart\Controller', 'renderWooCommerceSnipcartPage' ];
+        $submenu_pages['snipcart'] = [ 'WP2StaticWooCommerceSnipcart\Controller', 'renderWooCommerceSnipcartPage' ];
 
         return $submenu_pages;
     }
 
     public static function saveOptionsFromUI() : void {
-        check_admin_referer( 'wp2static-woocommerce-snipcart-options' );
+        check_admin_referer( 'wp2static-snipcart' );
 
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'wp2static_addon_woocommerce_snipcart_options';
 
-        $personal_access_token =
-            $_POST['accessToken'] ?
+        $personal_api_key =
+            $_POST['publicAPIKey'] ?
             self::encrypt_decrypt(
                 'encrypt',
-                sanitize_text_field( $_POST['accessToken'] )
+                sanitize_text_field( $_POST['publicAPIKey'] )
             ) : '';
 
         $wpdb->update(
             $table_name,
-            [ 'value' => $personal_access_token ],
-            [ 'name' => 'accessToken' ]
+            [ 'value' => $personal_api_key ],
+            [ 'name' => 'publicAPIKey' ]
         );
 
-        $wpdb->update(
-            $table_name,
-            [ 'value' => sanitize_text_field( $_POST['siteID'] ) ],
-            [ 'name' => 'siteID' ]
-        );
-
-        wp_safe_redirect( admin_url( 'admin.php?page=wp2static-woocommerce-snipcart' ) );
+        wp_safe_redirect( admin_url( 'admin.php?page=wp2static-snipcart' ) );
         exit;
     }
 
@@ -304,6 +281,14 @@ class Controller {
         }
 
         return $option_value;
+    }
+
+    public static function wooToSnipcart( $filename ) : void {
+        \WP2Static\WsLog::l( 'Starting WooCommerce to Snipcart conversion.' );
+
+        $woocommerce_snipcart_processor = new Processor();
+
+        \WP2Static\WsLog::l( 'WooCommerce to Snipcart conversion complete.' );
     }
 }
 

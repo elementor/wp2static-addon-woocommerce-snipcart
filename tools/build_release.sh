@@ -2,7 +2,7 @@
 
 ######################################
 ##
-## Build WP2Static WooCommerce Snipcart Deployment Addon
+## Build WP2Static WooCommerce Snipcart Addon
 ##
 ## script archive_name dont_minify
 ##

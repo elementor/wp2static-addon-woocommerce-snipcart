@@ -1,6 +1,4 @@
-<h2>WooCommerce Snipcart Deployment Options</h2>
-
-<h3>WooCommerce Snipcart</h3>
+<br>
 
 <form
     name="wp2static-woocommerce-snipcart-save-options"
@@ -16,32 +14,16 @@
         <tr>
             <td style="width:50%;">
                 <label
-                    for="<?php echo $view['options']['siteID']->name; ?>"
-                ><?php echo $view['options']['siteID']->label; ?></label>
+                    for="<?php echo $view['options']['publicAPIKey']->name; ?>"
+                ><?php echo $view['options']['publicAPIKey']->label; ?></label>
             </td>
             <td>
                 <input
-                    id="<?php echo $view['options']['siteID']->name; ?>"
-                    name="<?php echo $view['options']['siteID']->name; ?>"
-                    type="text"
-                    value="<?php echo $view['options']['siteID']->value !== '' ? $view['options']['siteID']->value : ''; ?>"
-                />
-            </td>
-        </tr>
-
-        <tr>
-            <td style="width:50%;">
-                <label
-                    for="<?php echo $view['options']['accessToken']->name; ?>"
-                ><?php echo $view['options']['accessToken']->label; ?></label>
-            </td>
-            <td>
-                <input
-                    id="<?php echo $view['options']['accessToken']->name; ?>"
-                    name="<?php echo $view['options']['accessToken']->name; ?>"
+                    id="<?php echo $view['options']['publicAPIKey']->name; ?>"
+                    name="<?php echo $view['options']['publicAPIKey']->name; ?>"
                     type="password"
-                    value="<?php echo $view['options']['accessToken']->value !== '' ?
-                        \WP2StaticWooCommerceSnipcart\Controller::encrypt_decrypt('decrypt', $view['options']['accessToken']->value) :
+                    value="<?php echo $view['options']['publicAPIKey']->value !== '' ?
+                        \WP2StaticWooCommerceSnipcart\Controller::encrypt_decrypt('decrypt', $view['options']['publicAPIKey']->value) :
                         ''; ?>"
                 />
             </td>
