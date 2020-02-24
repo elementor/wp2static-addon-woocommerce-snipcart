@@ -287,6 +287,7 @@ class Controller {
         \WP2Static\WsLog::l( 'Starting WooCommerce to Snipcart conversion.' );
 
         $woocommerce_snipcart_processor = new Processor();
+        $woocommerce_snipcart_processor->woo_to_snipcart( $filename );
 
         \WP2Static\WsLog::l( 'WooCommerce to Snipcart conversion complete.' );
     }
