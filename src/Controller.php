@@ -38,6 +38,12 @@ class Controller {
             [ 'WP2StaticWooCommerceSnipcart\Controller', 'addSubmenuPage' ]
         );
 
+        add_filter(
+            'wp2static_modify_initial_crawl_list',
+            [ 'WP2StaticWooCommerceSnipcart\Controller', 'detectStoreURL' ]
+        );
+
+
         add_action(
             'admin_post_wp2static_woocommerce_snipcart_save_options',
             [ $this, 'saveOptionsFromUI' ],
@@ -284,12 +290,28 @@ class Controller {
     }
 
     public static function wooToSnipcart( $filename ) : void {
-        \WP2Static\WsLog::l( 'Starting WooCommerce to Snipcart conversion.' );
+        // TODO: fills logs, one entry to say it's activated preferred
+        // \WP2Static\WsLog::l( 'Starting WooCommerce to Snipcart conversion.' );
 
         $woocommerce_snipcart_processor = new Processor();
         $woocommerce_snipcart_processor->woo_to_snipcart( $filename );
+    }
 
-        \WP2Static\WsLog::l( 'WooCommerce to Snipcart conversion complete.' );
+    public static function detectStoreURL( $url_list ) : array {
+        $shop_id = wc_get_page_id( 'shop' );
+
+        if ( $shop_id !== -1 ) {
+            $shop_page_url = get_permalink( wc_get_page_id( 'shop' ) );
+            \WP2Static\WsLog::l( "Detected WooCommere Store URL: $shop_page_url." );
+            $url_list[] = $shop_page_url;
+
+            return $url_list;
+        }
+
+        \WP2Static\WsLog::l( "Detected WooCommere Store URL: '/shop/." );
+        $url_list[] = '/shop/';
+
+        return $url_list;
     }
 }
 
