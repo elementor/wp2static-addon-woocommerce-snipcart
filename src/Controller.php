@@ -1,6 +1,6 @@
 <?php
 
-namespace WP2StaticNetlify;
+namespace WP2StaticWooCommerceSnipcart;
 
 class Controller {
     const WP2STATIC_NETLIFY_VERSION = '0.1';
@@ -9,7 +9,7 @@ class Controller {
         // initialize options DB
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wp2static_addon_netlify_options';
+        $table_name = $wpdb->prefix . 'wp2static_addon_woocommerce_snipcart_options';
 
         $charset_collate = $wpdb->get_charset_collate();
 
@@ -35,11 +35,11 @@ class Controller {
 
         add_filter(
             'wp2static_add_menu_items',
-            [ 'WP2StaticNetlify\Controller', 'addSubmenuPage' ]
+            [ 'WP2StaticWooCommerceSnipcart\Controller', 'addSubmenuPage' ]
         );
 
         add_action(
-            'admin_post_wp2static_netlify_save_options',
+            'admin_post_wp2static_woocommerce_snipcart_save_options',
             [ $this, 'saveOptionsFromUI' ],
             15,
             1
@@ -54,8 +54,8 @@ class Controller {
 
         // if ( defined( 'WP_CLI' ) ) {
         // \WP_CLI::add_command(
-        // 'wp2static netlify',
-        // [ 'WP2StaticNetlify\CLI', 'netlify' ]);
+        // 'wp2static snipcart',
+        // [ 'WP2StaticWooCommerceSnipcart\CLI', 'snipcart' ]);
         // }
     }
 
@@ -68,7 +68,7 @@ class Controller {
         global $wpdb;
         $options = [];
 
-        $table_name = $wpdb->prefix . 'wp2static_addon_netlify_options';
+        $table_name = $wpdb->prefix . 'wp2static_addon_woocommerce_snipcart_options';
 
         $rows = $wpdb->get_results( "SELECT * FROM $table_name" );
 
@@ -85,7 +85,7 @@ class Controller {
     public static function seedOptions() : void {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wp2static_addon_netlify_options';
+        $table_name = $wpdb->prefix . 'wp2static_addon_woocommerce_snipcart_options';
 
         $query_string =
             "INSERT INTO $table_name (name, value, label, description)
@@ -105,7 +105,7 @@ class Controller {
             $query_string,
             'siteID',
             '',
-            'Site ID (Netlify or custom comain)',
+            'Site ID (WooCommerce Snipcart or custom comain)',
             ''
         );
 
@@ -120,7 +120,7 @@ class Controller {
     public static function saveOption( string $name, $value ) : void {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wp2static_addon_netlify_options';
+        $table_name = $wpdb->prefix . 'wp2static_addon_woocommerce_snipcart_options';
 
         $query_string = "INSERT INTO $table_name (name, value) VALUES (%s, %s);";
         $query = $wpdb->prepare( $query_string, $name, $value );
@@ -128,27 +128,20 @@ class Controller {
         $wpdb->query( $query );
     }
 
-    public static function renderNetlifyPage() : void {
+    public static function renderWooCommerceSnipcartPage() : void {
         $view = [];
-        $view['nonce_action'] = 'wp2static-netlify-options';
+        $view['nonce_action'] = 'wp2static-woocommerce-snipcart-options';
         $view['uploads_path'] = \WP2Static\SiteInfo::getPath( 'uploads' );
-        $netlify_path =
-            \WP2Static\SiteInfo::getPath( 'uploads' ) . 'wp2static-processed-site.netlify';
-
         $view['options'] = self::getOptions();
 
-        $view['netlify_url'] =
-            is_file( $netlify_path ) ?
-                \WP2Static\SiteInfo::getUrl( 'uploads' ) . 'wp2static-processed-site.netlify' : '#';
-
-        require_once __DIR__ . '/../views/netlify-page.php';
+        require_once __DIR__ . '/../views/woocommerce-snipcart-page.php';
     }
 
     public function deploy( string $processed_site_path ) : void {
-        \WP2Static\WsLog::l( 'Starting Netlify deployment.' );
+        \WP2Static\WsLog::l( 'Starting WooCommerce Snipcart deployment.' );
 
-        $netlify_deployer = new Deployer();
-        $netlify_deployer->upload_files( $processed_site_path );
+        $woocommerce_snipcart_deployer = new Deployer();
+        $woocommerce_snipcart_deployer->upload_files( $processed_site_path );
     }
 
     /*
@@ -188,15 +181,15 @@ class Controller {
     }
 
     public static function activate_for_single_site() : void {
-        error_log( 'activating WP2Static Netlify Add-on' );
+        error_log( 'activating WP2Static WooCommerce Snipcart Add-on' );
     }
 
     public static function deactivate_for_single_site() : void {
-        error_log( 'deactivating WP2Static Netlify Add-on, maintaining options' );
+        error_log( 'deactivating WP2Static WooCommerce Snipcart Add-on, maintaining options' );
     }
 
     public static function deactivate( bool $network_wide = null ) : void {
-        error_log( 'deactivating WP2Static Netlify Add-on' );
+        error_log( 'deactivating WP2Static WooCommerce Snipcart Add-on' );
         if ( $network_wide ) {
             global $wpdb;
 
@@ -222,7 +215,7 @@ class Controller {
     }
 
     public static function activate( bool $network_wide = null ) : void {
-        error_log( 'activating netlify addon' );
+        error_log( 'activating woocommerce snipcart  addon' );
         if ( $network_wide ) {
             global $wpdb;
 
@@ -254,17 +247,17 @@ class Controller {
      * @return mixed[] list of menu items
      */
     public static function addSubmenuPage( array $submenu_pages ) : array {
-        $submenu_pages['netlify'] = [ 'WP2StaticNetlify\Controller', 'renderNetlifyPage' ];
+        $submenu_pages['woocommerce-snipcart'] = [ 'WP2StaticWooCommerceSnipcart\Controller', 'renderWooCommerceSnipcartPage' ];
 
         return $submenu_pages;
     }
 
     public static function saveOptionsFromUI() : void {
-        check_admin_referer( 'wp2static-netlify-options' );
+        check_admin_referer( 'wp2static-woocommerce-snipcart-options' );
 
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wp2static_addon_netlify_options';
+        $table_name = $wpdb->prefix . 'wp2static_addon_woocommerce_snipcart_options';
 
         $personal_access_token =
             $_POST['accessToken'] ?
@@ -285,7 +278,7 @@ class Controller {
             [ 'name' => 'siteID' ]
         );
 
-        wp_safe_redirect( admin_url( 'admin.php?page=wp2static-netlify' ) );
+        wp_safe_redirect( admin_url( 'admin.php?page=wp2static-woocommerce-snipcart' ) );
         exit;
     }
 
@@ -297,7 +290,7 @@ class Controller {
     public static function getValue( string $name ) : string {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wp2static_addon_netlify_options';
+        $table_name = $wpdb->prefix . 'wp2static_addon_woocommerce_snipcart_options';
 
         $sql = $wpdb->prepare(
             "SELECT value FROM $table_name WHERE" . ' name = %s LIMIT 1',

@@ -1,15 +1,15 @@
 <?php
 
-namespace WP2StaticNetlify;
+namespace WP2StaticWooCommerceSnipcart;
 
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use GuzzleHttp\Client;
 
 /**
- * Netlify Deployer
+ * WooCommerce Snipcart Deployer
  *
- * - uses Netlify's digest method, doesn't need WP2Static's DeployCache
+ * - uses WooCommerce Snipcart's digest method, doesn't need WP2Static's DeployCache
  */
 class Deployer {
 
@@ -30,7 +30,7 @@ class Deployer {
             )
         );
 
-        // Get all deployable file hashes to send to Netlify
+        // Get all deployable file hashes to send to WooCommerce Snipcart
         foreach ( $iterator as $filename => $file_object ) {
             $base_name = basename( $filename );
 
@@ -57,9 +57,9 @@ class Deployer {
             }
         }
 
-        // Send digest to Netlify to confirm which files have changed
+        // Send digest to WooCommerce Snipcart to confirm which files have changed
         $site_id = Controller::getValue( 'siteID' );
-        $access_token = \WP2StaticNetlify\Controller::encrypt_decrypt(
+        $access_token = \WP2StaticWooCommerceSnipcart\Controller::encrypt_decrypt(
             'decrypt',
             Controller::getValue( 'accessToken' )
         );
@@ -87,7 +87,7 @@ class Deployer {
         $state = $response->state;
         $required_hashes = $response->required;
 
-        // TODO: rm duplicate hashes - Netlify only wants one if identical
+        // TODO: rm duplicate hashes - WooCommerce Snipcart only wants one if identical
         // TODO: easy optimizations by filtering lists
         foreach ( $filename_path_hashes as $hash => $file_info ) {
             $filename = $file_info[0];
@@ -120,7 +120,7 @@ class Deployer {
         }
 
         \WP2Static\WsLog::l(
-            "Netlify deploy complete. $deployed deployed, $cache_skipped unchanged."
+            "WooCommerce Snipcart deploy complete. $deployed deployed, $cache_skipped unchanged."
         );
     }
 }
